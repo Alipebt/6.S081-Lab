@@ -706,15 +706,14 @@ void getprocnum(uint64 *num)
 	struct proc *p;
 	*num = 0;
 
-	while (1)
+	intr_on();
+	for (p = proc; p < &proc[NPROC]; p++)
 	{
-		intr_on();
-		for (p = proc; p < &proc[NPROC]; p++)
+		if (p->state != UNUSED)
 		{
-			if (p->state != UNUSED)
-			{
-				(*num)++;
-			}
+			(*num)++;
 		}
 	}
+
+	return;
 }
