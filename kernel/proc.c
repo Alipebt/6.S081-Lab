@@ -703,6 +703,7 @@ void procdump(void)
 
 void getprocnum(uint64 *num)
 {
+
 	struct proc *p;
 	*num = 0;
 
