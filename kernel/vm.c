@@ -30,7 +30,7 @@ kvmmake(void)
   // virtio mmio disk interface
   kvmmap(kpgtbl, VIRTIO0, VIRTIO0, PGSIZE, PTE_R | PTE_W);
 
-  // PLIC
+  // PLI
   kvmmap(kpgtbl, PLIC, PLIC, 0x400000, PTE_R | PTE_W);
 
   // map kernel text executable and read-only.
@@ -53,6 +53,13 @@ kvmmake(void)
 void kvminit(void)
 {
   kernel_pagetable = kvmmake();
+}
+
+pagetable_t proc_kpt_init()
+{
+  pagetable_t kernelpt = uvmcreate();
+  if (kernelpt == 0)
+    return 0;
 }
 
 // Switch h/w page table register to the kernel's page table,
@@ -131,6 +138,12 @@ walkaddr(pagetable_t pagetable, uint64 va)
 // only used when booting.
 // does not flush TLB or enable paging.
 void kvmmap(pagetable_t kpgtbl, uint64 va, uint64 pa, uint64 sz, int perm)
+{
+  if (mappages(kpgtbl, va, sz, pa, perm) != 0)
+    panic("kvmmap");
+}
+
+void uvmmap(pagetable_t kpgtbl, uint64 va, uint64 pa, uint64 sz, int perm)
 {
   if (mappages(kpgtbl, va, sz, pa, perm) != 0)
     panic("kvmmap");
