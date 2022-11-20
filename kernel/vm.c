@@ -55,22 +55,6 @@ void kvminit(void)
   kernel_pagetable = kvmmake();
 }
 
-pagetable_t ukvminit()
-{
-  pagetable_t kpagetable = (pagetable_t)kalloc();
-  memset(kpagetable, 0, PGSIZE);
-
-  ukvmmap(kpagetable, UART0, UART0, PGSIZE, PTE_R | PTE_W);
-  ukvmmap(kpagetable, VIRTIO0, VIRTIO0, PGSIZE, PTE_R | PTE_W);
-  ukvmmap(kpagetable, CLINT, CLINT, 0x10000, PTE_R | PTE_W);
-  ukvmmap(kpagetable, PLIC, PLIC, 0x400000, PTE_R | PTE_W);
-  ukvmmap(kpagetable, KERNBASE, KERNBASE, (uint64)etext - KERNBASE, PTE_R | PTE_X);
-  ukvmmap(kpagetable, (uint64)etext, (uint64)etext, PHYSTOP - (uint64)etext, PTE_R | PTE_W);
-  ukvmmap(kpagetable, TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X);
-
-  return kpagetable;
-}
-
 // Switch h/w page table register to the kernel's page table,
 // and enable paging.
 void kvminithart()
@@ -150,12 +134,6 @@ void kvmmap(pagetable_t kpgtbl, uint64 va, uint64 pa, uint64 sz, int perm)
 {
   if (mappages(kpgtbl, va, sz, pa, perm) != 0)
     panic("kvmmap");
-}
-
-void ukvmmap(pagetable_t kpgtbl, uint64 va, uint64 pa, uint64 sz, int perm)
-{
-  if (mappages(kpgtbl, va, sz, pa, perm) != 0)
-    panic("ukvmmap");
 }
 
 // Create PTEs for virtual addresses starting at va that refer to
