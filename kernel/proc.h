@@ -108,9 +108,10 @@ struct proc
   struct proc *parent; // Parent process
 
   // these are private to the process, so p->lock need not be held.
-  uint64 kstack;               // Virtual address of kernel stack
-  uint64 sz;                   // Size of process memory (bytes)
-  pagetable_t pagetable;       // User page table
+  uint64 kstack;         // Virtual address of kernel stack
+  uint64 sz;             // Size of process memory (bytes)
+  pagetable_t pagetable; // User page table
+  struct usyscall *usyscallpage;
   struct trapframe *trapframe; // data page for trampoline.S
   struct context context;      // swtch() here to run process
   struct file *ofile[NOFILE];  // Open files
