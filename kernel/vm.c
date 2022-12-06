@@ -461,6 +461,7 @@ void vmprint(pagetable_t pagetable, int level)
 
   for (int i = 0; i < 512; i++)
   {
+
     pte_t pte = pagetable[i];
 
     if (pte & PTE_V)
@@ -473,6 +474,7 @@ void vmprint(pagetable_t pagetable, int level)
         }
         printf("..");
       }
+
       uint64 child = PTE2PA(pte);
       printf("%d: pte %p pa %p\n", i, pte, child);
 
