@@ -476,12 +476,11 @@ void vmprint(pagetable_t pagetable, int level)
       uint64 child = PTE2PA(pte);
       printf("%d: pte %p pa %p\n", i, pte, child);
 
-      if ((pte & (PTE_R | PTE_W | PTE_X)) == 0)
+      if ((pte & PTE_V) && (pte & (PTE_R | PTE_W | PTE_X)) == 0)
       {
         // this PTE points to a lower-level page table.
 
         vmprint((pagetable_t)child, level + 1);
-        pagetable[i] = 0;
       }
     }
   }

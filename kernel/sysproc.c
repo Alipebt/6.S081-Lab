@@ -12,7 +12,7 @@ sys_exit(void)
   int n;
   argint(0, &n);
   exit(n);
-  return 0;  // not reached
+  return 0; // not reached
 }
 
 uint64
@@ -43,7 +43,7 @@ sys_sbrk(void)
 
   argint(0, &n);
   addr = myproc()->sz;
-  if(growproc(n) < 0)
+  if (growproc(n) < 0)
     return -1;
   return addr;
 }
@@ -54,12 +54,13 @@ sys_sleep(void)
   int n;
   uint ticks0;
 
-
   argint(0, &n);
   acquire(&tickslock);
   ticks0 = ticks;
-  while(ticks - ticks0 < n){
-    if(killed(myproc())){
+  while (ticks - ticks0 < n)
+  {
+    if (killed(myproc()))
+    {
       release(&tickslock);
       return -1;
     }
@@ -69,12 +70,37 @@ sys_sleep(void)
   return 0;
 }
 
-
 #ifdef LAB_PGTBL
-int
-sys_pgaccess(void)
+int sys_pgaccess(void)
 {
   // lab pgtbl: your code here.
+  uint64 va;
+  int pgnum;
+  uint64 bitmaskaddr;
+  uint64 mask;
+
+  argaddr(0, &va);
+  argint(1, &pgnum);
+  argaddr(2, &bitmaskaddr);
+  mask = 0;
+  struct proc *proc = myproc();
+  for (int i = 0; i < pgnum; i++)
+  {
+    pte_t *pte = walk(proc->pagetable, va + i * PGSIZE, 0);
+    if (pte == 0)
+    {
+      panic("pte error");
+    }
+    if (PTE_FLAGS(*pte) & PTE_A)
+    {
+      mask = mask | (1L << i);
+    }
+    *pte = ((*pte & PTE_A) ^ *pte) ^ 0;
+    if (copyout(proc->pagetable, bitmaskaddr, (char *)&mask, sizeof(mask)) < 0)
+    {
+      panic("sys_pgaccess error");
+    }
+  }
   return 0;
 }
 #endif
