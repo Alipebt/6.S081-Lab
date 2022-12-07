@@ -43,7 +43,7 @@ kvmmake(void)
   // the highest virtual address in the kernel.
   kvmmap(kpgtbl, TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X);
 
-  // allocate and map a kernel stack for each process.
+  // map kernel stacks
   proc_mapstacks(kpgtbl);
   
   return kpgtbl;
@@ -61,12 +61,7 @@ kvminit(void)
 void
 kvminithart()
 {
-  // wait for any previous writes to the page table memory to finish.
-  sfence_vma();
-
   w_satp(MAKE_SATP(kernel_pagetable));
-
-  // flush stale entries from the TLB.
   sfence_vma();
 }
 
@@ -208,12 +203,12 @@ uvmcreate()
 // for the very first process.
 // sz must be less than a page.
 void
-uvmfirst(pagetable_t pagetable, uchar *src, uint sz)
+uvminit(pagetable_t pagetable, uchar *src, uint sz)
 {
   char *mem;
 
   if(sz >= PGSIZE)
-    panic("uvmfirst: more than a page");
+    panic("inituvm: more than a page");
   mem = kalloc();
   memset(mem, 0, PGSIZE);
   mappages(pagetable, 0, PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_X|PTE_U);
@@ -223,7 +218,7 @@ uvmfirst(pagetable_t pagetable, uchar *src, uint sz)
 // Allocate PTEs and physical memory to grow process from oldsz to
 // newsz, which need not be page aligned.  Returns new size or 0 on error.
 uint64
-uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz, int xperm)
+uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz)
 {
   char *mem;
   uint64 a;
@@ -239,7 +234,7 @@ uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz, int xperm)
       return 0;
     }
     memset(mem, 0, PGSIZE);
-    if(mappages(pagetable, a, PGSIZE, (uint64)mem, PTE_R|PTE_U|xperm) != 0){
+    if(mappages(pagetable, a, PGSIZE, (uint64)mem, PTE_W|PTE_X|PTE_R|PTE_U) != 0){
       kfree(mem);
       uvmdealloc(pagetable, a, oldsz);
       return 0;
