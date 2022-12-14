@@ -97,3 +97,15 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64 sys_sigalarm(void)
+{
+  argint(0, (int *)&myproc()->interval);
+  argaddr(1, (uint64 *)&myproc()->func);
+
+  return 0;
+}
+uint64 sys_sigreturn(void)
+{
+  return 0;
+}
