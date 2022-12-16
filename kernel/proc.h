@@ -121,4 +121,7 @@ struct proc
   uint64 interval;  // 警告间隔
   uint64 sum_ticks; // 一次调用总共警告的次数
   void (*func)();   // 处理程序函数的指针
+
+  struct trapframe save_trapfame;
+  int ret;
 };

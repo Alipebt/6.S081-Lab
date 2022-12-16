@@ -83,6 +83,7 @@ void usertrap(void)
   {
     if (p->interval <= ++p->sum_ticks)
     {
+      p->save_trapfame = *p->trapframe;
       p->trapframe->epc = (uint64)p->func;
       p->sum_ticks = 0;
     }
