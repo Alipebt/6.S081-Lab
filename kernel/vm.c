@@ -317,7 +317,7 @@ int uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
   // uint flags;
   // char *mem;
 
-  // add
+  //  add
   *new = *old;
 
   for (i = 0; i < sz; i += PGSIZE)
